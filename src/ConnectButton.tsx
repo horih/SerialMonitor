@@ -7,6 +7,8 @@ interface ConnectionButtonProps {
 
 const ConnectionButton = (props: ConnectionButtonProps) => {
     const [baudrate, setBaudRate] = useState<number>(9600);
+    const [command, setCommand] = useState<string>("");
+    const [end, setEnd] = useState<string>("");
     const connectToSerial = async () => {
         try {
             const port = await navigator.serial.requestPort();
@@ -26,15 +28,23 @@ const ConnectionButton = (props: ConnectionButtonProps) => {
         }
     };
 
-    const sendSerial = async () => {
-        if(props.port?.writable) {
-            
+    const sendCommand = async () => {
+        if (props.port?.writable) {
+            const encoder = new TextEncoder();
+            const writer = props.port.writable.getWriter();
+            await writer.write(encoder.encode(command + end));
+            console.log(command+end)
+            writer.releaseLock();
         }
+    }
+
+    const clearCommand = () => {
+        setCommand("");
     }
 
     return (
         <div className='grid grid-cols-2 gap-2 justify-center'>
-            <div className="card w-full h-64 m-4 bg-neutral text-neutral-content">
+            <div className="card w-full m-2 bg-neutral text-neutral-content">
                 <div className="card-body items-center text-center">
                     <h2 className="card-title">Connection</h2>
                     <div className='grid grid-cols-1 gap-4'>
@@ -54,14 +64,23 @@ const ConnectionButton = (props: ConnectionButtonProps) => {
                     </div>
                 </div>
             </div>
-            <div className="card w-full h-64 m-4 bg-neutral text-neutral-content">
+            <div className="card w-full m-2 bg-neutral text-neutral-content">
                 <div className="card-body items-center text-center">
                     <h2 className="card-title">Command</h2>
                     <div className='grid grid-cols-1 gap-4'>
-                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                    <div className="join">
+                        <input type="text" placeholder="Type here" value={command} onChange={(e) => { setCommand(e.target.value) }} className="input input-bordered w-full max-w-xs" />
+                        <select onChange={(e)=>setEnd(e.target.value)} className="select select-bordered join-item">
+                            <option disabled selected>End</option>
+                            <option>\r\n</option>
+                            <option>\n</option>
+                            <option>\r</option>
+                            <option value={""}>None</option>
+                        </select>
+                        </div>
                         <div className='grid grid-cols-2 gap-4'>
-                            <button onClick={connectToSerial} type="button" className="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800">Send</button>
-                            <button onClick={disconnectFromSerial} type="button" className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">Clear</button>
+                            <button onClick={sendCommand} type="button" className="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800">Send</button>
+                            <button onClick={clearCommand} type="button" className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">Clear</button>
                         </div>
                     </div>
                 </div>
