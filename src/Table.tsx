@@ -4,13 +4,17 @@ import { Data } from "./App";
 interface TableProps {
     data: { [key: string]: Data },
     group : number
+    setActive: (name: string, value: boolean) => void;
+    setGroup: (name: string, value: number) => void;
 }
 
 interface CellProps {
     data: Data,
     num: number,
-    name: String,
+    name: string,
     group: number,
+    setActive: (name: string, value: boolean) => void;
+    setGroup: (name: string, value: number) => void;
 }
 
 function Cell(props: CellProps) {
@@ -18,12 +22,12 @@ function Cell(props: CellProps) {
         <>
             <tr className="hover">
                 <th>{String(props.num)}</th>
-                <td><input type="checkbox" onChange={(e) => {props.data.setActive(Boolean(e.target.value))}} defaultChecked className="checkbox" /></td>
+                <td><input type="checkbox" onChange={(e) => {props.setActive(props.name,!props.data.active)}} defaultChecked className="checkbox" /></td>
                 <td>
-                    <select onChange={(e) => {props.data.setGroup(Number(e.target.value))}} className="select select-bordered select-xs w-full max-w-xs">
+                    <select onChange={(e) => {props.setGroup(props.name, Number(e.target.value))}} className="select select-bordered select-xs w-full max-w-xs">
                         <option disabled selected>Group</option>
                         {Array.from({ length: props.group }).map((_, index) => (
-                            <option key={index}>Group {index + 1}</option>
+                            <option key={index} value={index}>Group {index + 1}</option>
                         ))}
                     </select>
                 </td>
@@ -42,9 +46,9 @@ export default function Table(props: TableProps) {
 
     return (
         <>
-            <div className="card w-full m-2 bg-neutral text-neutral-content overflow-scroll-auto">
-                <div className="card-body items-center text-center ">
-                    <div className="overflow-x-auto">
+            <div className="card w-full h-2/3 flex flex-col m-2 bg-neutral text-neutral-content overflow-auto">
+                <div className="card-body items-center text-center">
+                    <div className="">
                         <table className="table ">
                             <thead>
                                 <tr>
@@ -61,7 +65,7 @@ export default function Table(props: TableProps) {
                             </thead>
                             <tbody>
                                 {props.data && Object.entries(props.data).map(([key, value], index) => (
-                                    <Cell data={value} name={key} num={index} group={props.group} />
+                                    <Cell data={value} name={key} num={index} group={props.group} setActive={props.setActive} setGroup={props.setGroup}/>
                                 ))}
                             </tbody>
                         </table>

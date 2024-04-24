@@ -8,9 +8,7 @@ import { INFINITY } from 'chart.js/helpers'
 
 export interface Data {
   active: boolean,
-  setActive: Dispatch<SetStateAction<boolean>>,
   group: number,
-  setGroup: Dispatch<SetStateAction<number>>,
   data: number[],
   max: number,
   min: number,
@@ -62,7 +60,7 @@ function Plotter(props: PlotterProps) {
   if (props.disp === 0) {
     return (
       <>
-        <div className=''>
+        <div className='h-2/3'>
           <div>
             {Array.from({ length: props.num }).map((_, index) => (
               <Stack />
@@ -74,10 +72,12 @@ function Plotter(props: PlotterProps) {
   } else {
     return (
       <>
-        <div role="tablist" className="tabs tabs-lifted">
-          {Array.from({ length: props.num }).map((_, index) => (
-            <Tab number={index} />
-          ))}
+        <div className="">
+          <div role="tablist" className="tabs tabs-lifted">
+            {Array.from({ length: props.num }).map((_, index) => (
+              <Tab number={index} />
+            ))}
+          </div>
         </div>
       </>
     );
@@ -91,6 +91,22 @@ function App() {
   const [values, setValues] = useState<{ [key: string]: Data }>({});
   const [tabNum, setTabNum] = useState<number>(0);
   const [disp, setDisp] = useState<number>(0);
+  
+  function setActive(name : string, value : boolean) {
+    console.log(name,value)
+    setValues(prevValues => ({
+      ...prevValues,
+      [name]: prevValues[name] ? {...prevValues[name], active : value} : {} as Data,
+    }));
+  }
+
+  function setGroup(name : string, value : number) {
+    console.log(name,value)
+    setValues(prevValues => ({
+      ...prevValues,
+      [name]: prevValues[name] ? {...prevValues[name], group : value} : {} as Data,
+    }));
+  }
 
   useEffect(() => {
     console.log(values)
@@ -115,7 +131,7 @@ function App() {
               for (const line of lines) {
                 if (line.includes(':')) {
                   const [key, value] = line.split(':').map(str => str.trim());
-                  const value_float = parseFloat(value);
+                  const value_float = parseFloat(parseFloat(value).toFixed(4));
                   if (key && !isNaN(value_float)) {
                     const current = Date.now();
                     setValues(prevValues => ({
@@ -126,22 +142,20 @@ function App() {
                           max: prevValues[key].max > value_float ? prevValues[key].max : value_float,
                           min: prevValues[key].min < value_float ? prevValues[key].min : value_float,
                           now: value_float,
-                          average: parseFloat((([...prevValues[key].data, value_float].reduce((a, b) => a + b, 0) / ([...prevValues[key].data, value_float].length)).toFixed(2))),
+                          average: parseFloat((([...prevValues[key].data, value_float].reduce((a, b) => a + b, 0) / ([...prevValues[key].data, value_float].length)).toFixed(4))),
                           hz: (1 / ((current - prevValues[key].prevTime) / 1000) !== INFINITY ? parseFloat((1 / ((current - prevValues[key].prevTime) / 1000)).toFixed(1)) : prevValues[key].hz),
                           prevTime: current,
                         }
                         : {
                           active: true,
-                          setActive: () => { },
                           group: 0,
-                          setGroup: () => { },
                           data: [value_float],
                           max: value_float,
                           min: value_float,
                           average: value_float,
                           now: value_float,
                           prevTime: Date.now(),
-                          hz: 60,
+                          hz: 1,
                         },
                     }));
                   }
@@ -162,27 +176,27 @@ function App() {
   }, [port]);
 
   return (
-    <div className='container mx-auto w-dvw h-dvh'>
-      <div className='grid grid-cols-2 gap-4 w-full h-full'>
+    <div className='container mx-auto overflow-hidden h-screen'>
+      <div className='grid grid-cols-2 gap-4'>
         <div>
           <div className='grid'>
-            <div className='w-full h-2/3 '>
+            <div className=''>
               <Plotter data={values} num={tabNum} disp={disp} />
             </div>
           </div>
-          <div className='grid '>
-            <div className='w-full h-1/3'>
+          <div className='grid'>
+            <div className=''>
               <Setting groups={tabNum} setGroups={setTabNum} disp={disp} setDisp={setDisp}></Setting>
             </div>
           </div>
         </div>
-        <div>
-          <div className='w-full h-svh'>
+        <div className=''>
+          <div className=''>
             <div className='grid'>
               <ConnectionButton setPort={setPort} port={port} />
             </div>
-            <div className='grid '>
-              <Table data={values} group={tabNum} />
+            <div className='grid'>
+              <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup}/>
             </div>
           </div>
         </div>
