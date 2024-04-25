@@ -1,10 +1,9 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import ConnectionButton from './ConnectButton'
-import Example from './Plotter'
+import Graph from './Plotter'
 import Table from './Table'
 import Setting from './Setting'
-import { INFINITY } from 'chart.js/helpers'
 
 export interface Data {
   active: boolean,
@@ -26,13 +25,33 @@ interface PlotterProps {
 
 function Plotter(props: PlotterProps) {
 
+  const [names, setNames] = useState<string[][]>(Array(props.num).fill([]));
+  const [data, setData] = useState<Data[][]>(Array(props.num).fill([]));
+
+  useEffect(() => {
+    const newNames: string[][] = Array(props.num).fill([]);
+    const newData: Data[][] = Array(props.num).fill([]);
+
+    for (let i = 0; i < props.num; i++) {
+      for (const [key, value] of Object.entries(props.data)) {
+        if (value.group === i) {
+          newNames[i].push(key);
+          newData[i].push(value);
+        }
+      }
+    }
+
+    setNames(newNames);
+    setData(newData);
+  }, [props.num, props.data]);
+
   function Tab({ number }: { number: number }) {
     if (number === 0) {
       return (
         <>
           <input type="radio" role="tab" className="tab tab-active" aria-label={"Tab" + number.toString()} />
           <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-6 w-full h-96">
-            <Example />
+            <Graph names={names[number]} data={data[number]} group={number}/>
           </div>
         </>
       );
@@ -40,31 +59,30 @@ function Plotter(props: PlotterProps) {
       return (
         <>
           <input type="radio" role="tab" className="tab" aria-label={"Tab" + number.toString()} />
-          <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-6 w-full h-dvh">
-            <Example />
+          <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-6 w-full h-96">
+            <Graph names={names[number]} data={data[number]} group={number}/>
           </div>
         </>
       );
     }
   }
 
-  function Stack() {
+  function Stack({ number }: { number: number }) {
     return (
-      <div className='grid w-full h-56'>
-        <Example />
+      <div className='grid w-full h-96'>
+        <Graph names={names[number]} data={data[number]} group={number}/>
       </div>
     );
   }
-
 
   if (props.disp === 0) {
     return (
       <>
         <div className='h-2/3'>
           <div>
-            {Array.from({ length: props.num }).map((_, index) => (
-              <Stack />
-            ))}
+            {Array.from({ length: props.num }).map((_, index) => {
+              return (<Stack number={index}/>);
+            })}
           </div>
         </div>
       </>
@@ -74,9 +92,9 @@ function Plotter(props: PlotterProps) {
       <>
         <div className="">
           <div role="tablist" className="tabs tabs-lifted">
-            {Array.from({ length: props.num }).map((_, index) => (
-              <Tab number={index} />
-            ))}
+            {Array.from({ length: props.num }).map((_, index) => {
+              return (<Tab number={index} />);
+            })}
           </div>
         </div>
       </>
@@ -89,22 +107,22 @@ function App() {
 
   const [port, setPort] = useState<SerialPort | undefined>();
   const [values, setValues] = useState<{ [key: string]: Data }>({});
-  const [tabNum, setTabNum] = useState<number>(0);
+  const [tabNum, setTabNum] = useState<number>(1);
   const [disp, setDisp] = useState<number>(0);
-  
-  function setActive(name : string, value : boolean) {
-    console.log(name,value)
+
+  function setActive(name: string, value: boolean) {
+    console.log(name, value)
     setValues(prevValues => ({
       ...prevValues,
-      [name]: prevValues[name] ? {...prevValues[name], active : value} : {} as Data,
+      [name]: prevValues[name] ? { ...prevValues[name], active: value } : {} as Data,
     }));
   }
 
-  function setGroup(name : string, value : number) {
-    console.log(name,value)
+  function setGroup(name: string, value: number) {
+    console.log(name, value)
     setValues(prevValues => ({
       ...prevValues,
-      [name]: prevValues[name] ? {...prevValues[name], group : value} : {} as Data,
+      [name]: prevValues[name] ? { ...prevValues[name], group: value } : {} as Data,
     }));
   }
 
@@ -143,7 +161,7 @@ function App() {
                           min: prevValues[key].min < value_float ? prevValues[key].min : value_float,
                           now: value_float,
                           average: parseFloat((([...prevValues[key].data, value_float].reduce((a, b) => a + b, 0) / ([...prevValues[key].data, value_float].length)).toFixed(4))),
-                          hz: (1 / ((current - prevValues[key].prevTime) / 1000) !== INFINITY ? parseFloat((1 / ((current - prevValues[key].prevTime) / 1000)).toFixed(1)) : prevValues[key].hz),
+                          hz: (current - prevValues[key].prevTime !== 0 ? parseFloat((1 / ((current - prevValues[key].prevTime) / 1000)).toFixed(1)) : prevValues[key].hz),
                           prevTime: current,
                         }
                         : {
@@ -196,7 +214,7 @@ function App() {
               <ConnectionButton setPort={setPort} port={port} />
             </div>
             <div className='grid'>
-              <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup}/>
+              <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} />
             </div>
           </div>
         </div>

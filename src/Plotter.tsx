@@ -1,77 +1,75 @@
-import { PureComponent } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React from 'react';
+import Chart from "react-apexcharts";
+import { Data } from './App';
+import { ApexOptions } from 'apexcharts';
 
-const data = [
-  {
-    name: 'Page A',
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: 'Page B',
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: 'Page C',
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: 'Page D',
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: 'Page E',
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: 'Page F',
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: 'Page G',
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-];
-
-export default class Example extends PureComponent {
-  render() {
-    return (
-        <ResponsiveContainer width="100%" height="100%" >
-          <LineChart
-            width={500}
-            height={300}
-            data={data}
-            
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-            
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" isAnimationActive={false} dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-            <Line type="monotone" isAnimationActive={false} dataKey="uv" stroke="#82ca9d" />
-          </LineChart>
-        </ResponsiveContainer>
-    );
-  }
+interface PlotterProps {
+  names : string[],
+  data : Data[],
+  group : number;
 }
+
+function Graph(props: PlotterProps) {
+  const options : ApexOptions = {
+    chart: {
+      id: "realtime",
+      type: "line",
+      animations: {
+        enabled: false,
+        easing: "linear",
+        dynamicAnimation: {
+          speed: 0
+        }
+      },
+      toolbar: {
+        show: true
+      },
+      zoom: {
+        enabled: false
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      width: 1,
+      curve: "smooth"
+    },
+    title: {
+      text: "Dynamic Updating Chart",
+      align: "left"
+    },
+    markers: {
+      size: 0
+    },
+    yaxis: {
+      max: 5
+    },
+    legend: {
+      show: false
+    }
+  };
+  const series : ApexAxisChartSeries = props.data 
+  ? [ 
+    ...props.data.map((item, index) => ({
+      name: props.names[index],
+      data: item.data
+    }))
+  ]
+  : [];
+
+
+  return (
+    <div>
+      <Chart
+        id={props.group}
+        options={options}
+        series={series}
+        type="line"
+        height={'100%'}
+      />
+    </div>
+  );
+};
+
+export default Graph;
