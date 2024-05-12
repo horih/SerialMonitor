@@ -16,7 +16,12 @@ export default function Setting(props: SettingProps) {
                     <h2 className="card-title">Setting</h2>
                     <div className="grid grid-cols-2">
                         <h1 className="card-title">Number of Groups</h1>
-                        <input type="text" value={props.groups} onChange={(e) => { props.setGroups(Number(e.target.value)) }} placeholder="Type here" className="input input-ghost w-full max-w-xs" />
+                        <select value={props.groups} onChange={(e) => { props.setGroups(Number(e.target.value)) }} className="select bg-neutral w-full max-w-xs">
+                            <option disabled selected>Number</option>
+                            <option value={1}>1</option>
+                            <option value={2}>2</option>
+                            <option value={3}>3</option>
+                        </select>
                     </div>
                     <div className="grid grid-cols-2">
                         <h1 className="card-title">Display Type</h1>
