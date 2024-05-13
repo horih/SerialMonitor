@@ -3,7 +3,7 @@ import { Data } from "./App";
 
 interface TableProps {
     data: { [key: string]: Data },
-    group : number
+    group: number
     setActive: (name: string, value: boolean) => void;
     setGroup: (name: string, value: number) => void;
 }
@@ -22,21 +22,24 @@ function Cell(props: CellProps) {
         <>
             <tr className="hover">
                 <th>{String(props.num)}</th>
-                <td><input type="checkbox" onChange={(e) => {props.setActive(props.name,!props.data.active)}} defaultChecked className="checkbox" /></td>
+                <td><input type="checkbox" checked={props.data.active} onChange={(e) => { props.setActive(props.name, !props.data.active) }} className="checkbox" /></td>
                 <td>
-                    <select onChange={(e) => {props.setGroup(props.name, Number(e.target.value))}} className="select select-bordered select-xs w-full max-w-xs">
+                    <select onChange={(e) => { props.setGroup(props.name, Number(e.target.value)) }} className="select select-bordered select-xs w-full max-w-xs">
                         <option disabled selected>Group</option>
                         {Array.from({ length: props.group }).map((_, index) => (
                             <option key={index} value={index}>Group {index + 1}</option>
                         ))}
                     </select>
                 </td>
-                <td>{props.name}</td>
-                <td>{props.data.now}</td>
-                <td>{props.data.average}</td>
-                <td>{props.data.max}</td>
-                <td>{props.data.min}</td>
-                <td>{props.data.hz}</td>
+                <td>
+                    <input type="color" className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700" id="hs-color-input" value="#2563eb" title="Choose your color"></input>
+                </td>
+                <td className="w-24">{props.name}</td>
+                <td className="w-24">{props.data.now}</td>
+                <td className="w-24">{props.data.average}</td>
+                <td className="w-24">{props.data.max}</td>
+                <td className="w-24">{props.data.min}</td>
+                <td className="w-24">{props.data.hz}</td>
             </tr>
         </>
     );
@@ -46,26 +49,27 @@ export default function Table(props: TableProps) {
 
     return (
         <>
-            <div className="card w-full h-2/3 flex flex-col m-2 bg-neutral text-neutral-content overflow-auto">
+            <div className="card w-full h-fit p-1 flex flex-colm-1 bg-neutral text-neutral-content">
                 <div className="card-body items-center text-center">
                     <div className="">
                         <table className="table ">
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Active</th>
-                                    <th>Group</th>
-                                    <th>Name</th>
-                                    <th>Now</th>
-                                    <th>Average</th>
-                                    <th>Max</th>
-                                    <th>Min</th>
-                                    <th>Hz</th>
+                                    <th >Active</th>
+                                    <th className="w-28">Group</th>
+                                    <th >Color</th>
+                                    <th className="w-24">Name</th>
+                                    <th className="w-24">Now</th>
+                                    <th className="w-24">Average</th>
+                                    <th className="w-24">Max</th>
+                                    <th className="w-24">Min</th>
+                                    <th className="w-24">Hz</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {props.data && Object.entries(props.data).map(([key, value], index) => (
-                                    <Cell data={value} name={key} num={index} group={props.group} setActive={props.setActive} setGroup={props.setGroup}/>
+                                    <Cell data={value} name={key} num={index} group={props.group} setActive={props.setActive} setGroup={props.setGroup} />
                                 ))}
                             </tbody>
                         </table>

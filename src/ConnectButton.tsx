@@ -43,8 +43,8 @@ const ConnectionButton = (props: ConnectionButtonProps) => {
     }
 
     return (
-        <div className='grid grid-cols-2 gap-2 justify-center'>
-            <div className="card w-full m-2 bg-neutral text-neutral-content">
+        <div className='grid grid-cols-2 gap-1'>
+            <div className="card w-full bg-neutral text-neutral-content">
                 <div className="card-body items-center text-center">
                     <h2 className="card-title">Connection</h2>
                     <div className='grid grid-cols-1 gap-4'>
@@ -64,7 +64,7 @@ const ConnectionButton = (props: ConnectionButtonProps) => {
                     </div>
                 </div>
             </div>
-            <div className="card w-full m-2 bg-neutral text-neutral-content">
+            <div className="card w-full bg-neutral text-neutral-content">
                 <div className="card-body items-center text-center">
                     <h2 className="card-title">Command</h2>
                     <div className='grid grid-cols-1 gap-4'>

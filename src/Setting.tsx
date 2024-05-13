@@ -13,7 +13,6 @@ export default function Setting(props: SettingProps) {
         <>
             <div className="card w-full m-2 bg-neutral text-neutral-content">
                 <div className="card-body items-center text-center">
-                    <h2 className="card-title">Setting</h2>
                     <div className="grid grid-cols-2">
                         <h1 className="card-title">Number of Groups</h1>
                         <select value={props.groups} onChange={(e) => { props.setGroups(Number(e.target.value)) }} className="select bg-neutral w-full max-w-xs">

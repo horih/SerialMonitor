@@ -4,9 +4,11 @@ import ConnectionButton from './ConnectButton'
 import RealTimeChart from './RealtimeChart'
 import Table from './Table'
 import Setting from './Setting'
+import MessageDisp from './MessageDisp'
 
 export interface Data {
   active: boolean,
+  color: string,
   group: number,
   max: number,
   min: number,
@@ -23,35 +25,36 @@ interface PlotterProps {
   data: { [key: string]: Data }
 };
 
-function Tab({ number }: { number: number }) {
-  if (number === 0) {
+interface TabProps {
+  data: Data[];
+  number: number
+}
+
+function Tab(props: TabProps) {
+  if (props.number === 0) {
     return (
       <>
-        <input type="radio" role="tab" className="tab tab-active" aria-label={"Tab" + number.toString()} />
-        <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-6 w-full h-96 ">
-          {/* <Graph names={names[number]} data={data[number]} group={number} /> */}
-        </div>
+        <input type="radio" role="tab" className="tab" checked aria-label={"Tab" + props.number.toString()} />
+        <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box"><RealTimeChart key={props.number} data={props.data} /></div>
       </>
     );
   } else {
     return (
       <>
-        <input type="radio" role="tab" className="tab" aria-label={"Tab" + number.toString()} />
-        <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-6 w-full h-96">
-          {/* <Graph names={names[number]} data={data[number]} group={number} /> */}
-        </div>
+        <input type="radio" role="tab" className="tab" aria-label={"Tab" + props.number.toString()} />
+        <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box "><RealTimeChart key={props.number} data={props.data} /></div>
       </>
     );
   }
 }
 
 interface StackProps {
-  data : Data[];
+  data: Data[];
 }
-function Stack(props : StackProps ) {
+function Stack(props: StackProps) {
   return (
-    <div className='grid w-full h-96'>
-      <RealTimeChart data={props.data}/>
+    <div className='grid w-full h-auto'>
+      <RealTimeChart data={props.data} />
     </div>
   );
 }
@@ -66,6 +69,7 @@ function Plotter(props: PlotterProps) {
     const newData: Data[][] = Array.from({ length: 3 }, () => []);
 
     for (const [key, value] of Object.entries(props.data)) {
+      if (!value.active) continue;
       newNames[value.group].push(key);
       newData[value.group].push(value);
     }
@@ -74,31 +78,23 @@ function Plotter(props: PlotterProps) {
     setData(newData);
   }, [props.data]);
 
-  
+
 
   if (props.disp === 0) {
     return (
-      <>
-        <div className=''>
-          <div>
-            {Array.from({ length: props.disp_num }).map((_, index) => (
-              <Stack key={index} data={data[index]} />
-            ))}
-          </div>
-        </div>
-      </>
+      <div className=''>
+        {Array.from({ length: props.disp_num }).map((_, index) => (
+          <Stack key={index} data={data[index]} />
+        ))}
+      </div>
     );
   } else {
     return (
-      <>
-        <div className="">
-          <div role="tablist" className="tabs tabs-lifted">
-            {Array.from({ length: props.disp_num }).map((_, index) => (
-              <Stack key={index} data={data[index]} />
-            ))}
-          </div>
-        </div>
-      </>
+      <div role="tablist" className="tabs tabs-bordered">
+        {Array.from({ length: props.disp_num }).map((_, index) => (
+          <Tab key={index} data={data[index]} number={index} />
+        ))}
+      </div>
     );
   }
 
@@ -110,11 +106,19 @@ function App() {
   const [values, setValues] = useState<{ [key: string]: Data }>({});
   const [tabNum, setTabNum] = useState<number>(1);
   const [disp, setDisp] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   function setActive(name: string, value: boolean) {
     setValues(prevValues => ({
       ...prevValues,
       [name]: prevValues[name] ? { ...prevValues[name], active: value } : {} as Data,
+    }));
+  }
+
+  function setColor(name: string, value: string) {
+    setValues(prevValues => ({
+      ...prevValues,
+      [name]: prevValues[name] ? { ...prevValues[name], color: value } : {} as Data,
     }));
   }
 
@@ -131,18 +135,17 @@ function App() {
       while (port?.readable) {
         const reader = port.readable.getReader();
         try {
-          while (port.readable) {
+          while (port) {
             const { value, done } = await reader.read();
             if (done) {
               break;
             }
             const text = new TextDecoder().decode(value);
             receivedText += text;
-
             if (text.includes('\n')) {
               const lines = receivedText.split('\n');
               for (const line of lines) {
-                if (line.includes(':')) {
+                if (line.includes(':') && line.includes('\r')) {
                   const [key, value] = line.split(':').map(str => str.trim());
                   const value_float = parseFloat(parseFloat(value).toFixed(4));
                   if (key && !isNaN(value_float)) {
@@ -161,7 +164,8 @@ function App() {
                           prevTime: current,
                         }
                         : {
-                          active: true,
+                          active: false,
+                          color: 'rgb(225, 50, 85)',
                           group: 0,
                           max: value_float,
                           min: value_float,
@@ -190,32 +194,33 @@ function App() {
   }, [port]);
 
   return (
-    <div className='container mx-auto overflow-hidden h-screen'>
-      <div className='grid grid-cols-2 gap-4'>
-        <div>
-          <div className='grid'>
-            <div className=''>
-              <Plotter data={values} disp={disp} disp_num={tabNum}/>
-            </div>
-          </div>
-          <div className='grid'>
-            <div className=''>
-              <Setting groups={tabNum} setGroups={setTabNum} disp={disp} setDisp={setDisp}></Setting>
-            </div>
-          </div>
+    <div className='w-dvw overflow-hidden h-dvh'>
+      <div className='flex'>
+        <div className='w-1/2 h-full'>
+          <Plotter data={values} disp={disp} disp_num={tabNum} />
         </div>
-        <div className=''>
-          <div className=''>
-            <div className='grid'>
-              <ConnectionButton setPort={setPort} port={port} />
-            </div>
-            <div className='grid'>
-              <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} />
-            </div>
+        <div className='w-1/2 h-full'>
+          <div className='h-1/3 m-2'>
+            <ConnectionButton setPort={setPort} port={port} />
           </div>
+          <div className="join grid grid-cols-3 m-4">
+            <button className="join-item btn btn-outline" onClick={() => { setActiveTab(0) }}>Table</button>
+            <button className="join-item btn btn-outline" onClick={() => { setActiveTab(1) }}>Message</button>
+            <button className="join-item btn btn-outline" onClick={() => { setActiveTab(2) }}>Setting</button>
+          </div>
+          {activeTab === 0 && (
+            <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} />
+          )}
+          {activeTab === 1 && (
+            <MessageDisp />
+          )}
+          {activeTab === 2 && (
+            <Setting groups={tabNum} setGroups={setTabNum} disp={disp} setDisp={setDisp} />
+          )}
         </div>
       </div>
-    </div>
+    </div >
+
   )
 }
 
