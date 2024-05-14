@@ -26,7 +26,7 @@ const useWindowSize = (): number[] => {
     return size;
 };
 
-const useAnimationFrame = (callback = () => { }) => {
+export const useAnimationFrame = (callback = () => { }) => {
     const reqIdRef = useRef<number>();
     const loop = useCallback(() => {
         reqIdRef.current = requestAnimationFrame(loop);
@@ -39,21 +39,25 @@ const useAnimationFrame = (callback = () => { }) => {
     }, [loop]);
 }
 
+export function animate(series :ISeriesApi<"Line", Time, LineData<Time> | WhitespaceData<Time>, LineSeriesOptions, DeepPartial<LineStyleOptions & SeriesOptionsCommon>>[], arr : Arr[][] ){
+    series.forEach((s, index) => {
+        if(arr[index].length > 1000) {
+            s.setData(arr[index].slice(arr[index].length-1000, arr[index].length - 1))
+        }else{
+            s.setData(arr[index]);
+        }
+        
+    });
+};
+
 
 export default function RealTimeChart(props: RealTimeChartProps) {
     const chartContainerRef = useRef<HTMLDivElement | null>(null);
-    const boxRef = useRef<HTMLDivElement | null>(null);
     const [series, setSeries] = useState<ISeriesApi<"Line", Time, LineData<Time> | WhitespaceData<Time>, LineSeriesOptions, DeepPartial<LineStyleOptions & SeriesOptionsCommon>>[]>([]);
     const [arr, setArr] = useState<Arr[][]>([]);
     const [width, height] = useWindowSize();
 
-    const animate = () => {
-        series.forEach((s, index) => {
-            s.setData(arr[index]);
-        });
-    };
-
-    useAnimationFrame(animate);
+    useAnimationFrame(() => {animate(series,arr)});
 
     useEffect(() => {
         if (props.data.length > 0) {

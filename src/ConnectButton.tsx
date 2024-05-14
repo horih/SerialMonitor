@@ -48,14 +48,14 @@ const ConnectionButton = (props: ConnectionButtonProps) => {
                 <div className="card-body items-center text-center">
                     <h2 className="card-title">Connection</h2>
                     <div className='grid grid-cols-1 gap-4'>
-                        <select className="select select-ghost w-full max-w-xs" defaultValue={9600} value={baudrate} onChange={(e) => setBaudRate(Number(e.target.value))}>
-                            <option disabled selected>Pick the your baudrate</option>
-                            <option>9600</option>
-                            <option>19200</option>
-                            <option>38400</option>
-                            <option>115200</option>
-                            <option>1000000</option>
-                            <option>2000000</option>
+                        <select className="select select-ghost w-full max-w-xs" value={baudrate} onChange={(e) => setBaudRate(Number(e.target.value))}>
+                            <option disabled>Pick the your baudrate</option>
+                            <option value={9600}>9600</option>
+                            <option value={19200}>19200</option>
+                            <option value={38400}>38400</option>
+                            <option value={115200}>115200</option>
+                            <option value={1000000}>1000000</option>
+                            <option value={2000000}>2000000</option>
                         </select>
                         <div className='grid grid-cols-2 gap-4'>
                             <button onClick={connectToSerial} type="button" className="text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800">Connect</button>

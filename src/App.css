@@ -13,14 +13,3 @@ html,
   width: 100%;
   display: flex;
 }
-
-/* .resize {
-  width: 20px;
-  background: black;
-  display: flex;
-  align-items: center;
-}
-
-.icon {
-  cursor: col-resize;
-} */

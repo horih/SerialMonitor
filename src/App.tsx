@@ -107,6 +107,7 @@ function App() {
   const [tabNum, setTabNum] = useState<number>(1);
   const [disp, setDisp] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [message, setMessage] = useState<string[]>([]);
 
   function setActive(name: string, value: boolean) {
     setValues(prevValues => ({
@@ -138,50 +139,56 @@ function App() {
           while (port) {
             const { value, done } = await reader.read();
             if (done) {
-              break;
+              return;
             }
             const text = new TextDecoder().decode(value);
             receivedText += text;
-            if (text.includes('\n')) {
-              const lines = receivedText.split('\n');
-              for (const line of lines) {
-                if (line.includes(':') && line.includes('\r')) {
-                  const [key, value] = line.split(':').map(str => str.trim());
-                  const value_float = parseFloat(parseFloat(value).toFixed(4));
-                  if (key && !isNaN(value_float)) {
-                    const current = Date.now();
-                    setValues(prevValues => ({
-                      ...prevValues,
-                      [key]: prevValues[key]
-                        ? {
-                          ...prevValues[key],
-                          max: prevValues[key].max > value_float ? prevValues[key].max : value_float,
-                          min: prevValues[key].min < value_float ? prevValues[key].min : value_float,
-                          now: value_float,
-                          average: parseFloat((((prevValues[key].average * prevValues[key].count) + value_float) / (prevValues[key].count + 1)).toFixed(4)),
-                          count: prevValues[key].count + 1,
-                          hz: (current - prevValues[key].prevTime !== 0 ? parseFloat((1 / ((current - prevValues[key].prevTime) / 1000)).toFixed(0)) : prevValues[key].hz),
-                          prevTime: current,
-                        }
-                        : {
-                          active: false,
-                          color: '#0345fc',
-                          group: 0,
-                          max: value_float,
-                          min: value_float,
-                          average: value_float,
-                          now: value_float,
-                          prevTime: Date.now(),
-                          count: 1,
-                          hz: 1,
-                        },
-                    }));
-                  }
-                }
-              }
-              receivedText = lines[lines.length - 1];
-            }
+            if (!text.includes('\n')) continue;
 
+            const lines = receivedText.split('\n');
+
+            for (const line of lines) {
+
+              if (!line.includes('\r')) continue;
+
+              if(line.includes(':')){
+                const [key, value] = line.split(':').map(str => str.trim());
+                const value_float = parseFloat(parseFloat(value).toFixed(4));
+                if (!key || isNaN(value_float)) continue;
+  
+                const current = Date.now();
+                setValues(prevValues => ({
+                  ...prevValues,
+                  [key]: prevValues[key]
+                    ? {
+                      ...prevValues[key],
+                      max: prevValues[key].max > value_float ? prevValues[key].max : value_float,
+                      min: prevValues[key].min < value_float ? prevValues[key].min : value_float,
+                      now: value_float,
+                      average: parseFloat((((prevValues[key].average * prevValues[key].count) + value_float) / (prevValues[key].count + 1)).toFixed(4)),
+                      count: prevValues[key].count + 1,
+                      hz: (current - prevValues[key].prevTime !== 0 ? parseFloat((1 / ((current - prevValues[key].prevTime) / 1000)).toFixed(0)) : prevValues[key].hz),
+                      prevTime: current,
+                    }
+                    : {
+                      active: false,
+                      color: '#0345fc',
+                      group: 0,
+                      max: value_float,
+                      min: value_float,
+                      average: value_float,
+                      now: value_float,
+                      prevTime: Date.now(),
+                      count: 1,
+                      hz: 1,
+                    },
+                }));
+              }else if(line.slice(0,1) === "#"){
+                setMessage(prev => [...prev, line.slice(1, line.length - 1)]);
+              }
+            }
+            receivedText = lines[lines.length - 1];
+            
           }
         } catch (error) {
           console.error(`Error reading data: ${error}`);
@@ -194,12 +201,12 @@ function App() {
   }, [port]);
 
   return (
-    <div className='w-dvw overflow-hidden h-dvh'>
-      <div className='flex'>
-        <div className='w-1/2 h-full'>
+    <div className='w-dvw overflow-auto h-dvh'>
+      <div className='flex flex-col md:flex-row h-auto md:h-ful'>
+        <div className='w-full md:w-1/2 h-full'>
           <Plotter data={values} disp={disp} disp_num={tabNum} />
         </div>
-        <div className='w-1/2 h-full'>
+        <div className='w-full md:w-1/2 h-full'>
           <div className='h-1/3 m-2'>
             <ConnectionButton setPort={setPort} port={port} />
           </div>
@@ -209,10 +216,10 @@ function App() {
             <button className="join-item btn btn-outline" onClick={() => { setActiveTab(2) }}>Setting</button>
           </div>
           {activeTab === 0 && (
-            <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} setColor={setColor}/>
+            <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} setColor={setColor} />
           )}
           {activeTab === 1 && (
-            <MessageDisp />
+            <MessageDisp message={message} setMessage={setMessage}/>
           )}
           {activeTab === 2 && (
             <Setting groups={tabNum} setGroups={setTabNum} disp={disp} setDisp={setDisp} />

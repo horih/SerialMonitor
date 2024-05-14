@@ -2,17 +2,27 @@ import { useRef, useEffect } from 'react'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
-import { WebglAddon } from '@xterm/addon-webgl';
 
-export default function MessageDisp() {
+interface MessageProps {
+    message: string[],
+    setMessage : React.Dispatch<React.SetStateAction<string[]>>,
+};
+
+export default function MessageDisp(props: MessageProps) {
     const ref = useRef<HTMLDivElement | null>(null)
     const term = useRef<Terminal>(new Terminal());
 
+
+    useEffect(() => {
+        if (props.message.length > 0){
+            props.message.forEach(value => {term.current.writeln(value);})
+            props.setMessage([]);
+        }
+    }, [props.message])
+
     useEffect(() => {
         const fitAddon = new FitAddon();
-        const webglAddon = new WebglAddon();
         term.current.loadAddon(fitAddon);
-        term.current.loadAddon(webglAddon);
         if (!ref.current) {
             return;
         }
