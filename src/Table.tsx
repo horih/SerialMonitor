@@ -6,6 +6,7 @@ interface TableProps {
     group: number
     setActive: (name: string, value: boolean) => void;
     setGroup: (name: string, value: number) => void;
+    setColor: (name: string, value: string) => void;
 }
 
 interface CellProps {
@@ -15,6 +16,7 @@ interface CellProps {
     group: number,
     setActive: (name: string, value: boolean) => void;
     setGroup: (name: string, value: number) => void;
+    setColor: (name: string, value: string) => void;
 }
 
 function Cell(props: CellProps) {
@@ -22,7 +24,7 @@ function Cell(props: CellProps) {
         <>
             <tr className="hover">
                 <th>{String(props.num)}</th>
-                <td><input type="checkbox" checked={props.data.active} onChange={(e) => { props.setActive(props.name, !props.data.active) }} className="checkbox" /></td>
+                <td><input type="checkbox" checked={props.data.active} onChange={() => { props.setActive(props.name, !props.data.active) }} className="checkbox" /></td>
                 <td>
                     <select onChange={(e) => { props.setGroup(props.name, Number(e.target.value)) }} className="select select-bordered select-xs w-full max-w-xs">
                         <option disabled selected>Group</option>
@@ -32,7 +34,7 @@ function Cell(props: CellProps) {
                     </select>
                 </td>
                 <td>
-                    <input type="color" className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700" id="hs-color-input" value="#2563eb" title="Choose your color"></input>
+                    <input type="color" value={props.data.color} onChange={(e) => {console.log(e.target.value);props.setColor(props.name,e.target.value)}} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700" id="hs-color-input"  title="Choose your color"></input>
                 </td>
                 <td className="w-24">{props.name}</td>
                 <td className="w-24">{props.data.now}</td>
@@ -69,7 +71,7 @@ export default function Table(props: TableProps) {
                             </thead>
                             <tbody>
                                 {props.data && Object.entries(props.data).map(([key, value], index) => (
-                                    <Cell data={value} name={key} num={index} group={props.group} setActive={props.setActive} setGroup={props.setGroup} />
+                                    <Cell data={value} name={key} num={index} group={props.group} setActive={props.setActive} setGroup={props.setGroup} setColor={props.setColor}/>
                                 ))}
                             </tbody>
                         </table>

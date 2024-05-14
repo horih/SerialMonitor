@@ -91,7 +91,7 @@ export default function RealTimeChart(props: RealTimeChartProps) {
         });
         chart.timeScale().fitContent();
         setArr([]);
-        const newSeries = props.data.map(() => chart.addLineSeries({ lineType: 0 }));
+        const newSeries = props.data.map((d) => chart.addLineSeries({ lineType: 0, color: d.color}));
         setSeries(newSeries);
         return () => {
             chart.remove();

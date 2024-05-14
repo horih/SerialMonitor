@@ -165,7 +165,7 @@ function App() {
                         }
                         : {
                           active: false,
-                          color: 'rgb(225, 50, 85)',
+                          color: '#0345fc',
                           group: 0,
                           max: value_float,
                           min: value_float,
@@ -209,7 +209,7 @@ function App() {
             <button className="join-item btn btn-outline" onClick={() => { setActiveTab(2) }}>Setting</button>
           </div>
           {activeTab === 0 && (
-            <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} />
+            <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} setColor={setColor}/>
           )}
           {activeTab === 1 && (
             <MessageDisp />
