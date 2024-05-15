@@ -60,9 +60,6 @@ export default function RealTimeChart(props: RealTimeChartProps) {
     }, [props.data]);
 
     useEffect(() => {
-        // const handleResize = () => {
-        //     chart.applyOptions({ width: props.width });
-        // };
         const chart = createChart(chartContainerRef.current!, {
             width: props.width,
             height: 320,

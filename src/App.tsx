@@ -52,7 +52,7 @@ function Stack(props: StackProps) {
   }, []);
   return (
     <div ref={containerRef} className='grid w-full h-fit'>
-      <RealTimeChart data={props.data} width={width}/>
+      <RealTimeChart data={props.data} width={width} />
     </div>
   );
 }
@@ -76,13 +76,13 @@ function Plotter(props: PlotterProps) {
     setData(newData);
   }, [props.data]);
 
-    return (
-      <div className=''>
-        {Array.from({ length: props.disp_num }).map((_, index) => (
-          <Stack key={index} data={data[index]} />
-        ))}
-      </div>
-    );
+  return (
+    <div className=''>
+      {Array.from({ length: props.disp_num }).map((_, index) => (
+        <Stack key={index} data={data[index]} />
+      ))}
+    </div>
+  );
 }
 
 function App() {
@@ -136,11 +136,11 @@ function App() {
 
               if (!line.includes('\r')) continue;
 
-              if(line.includes(':')){
+              if (line.includes(':')) {
                 const [key, value] = line.split(':').map(str => str.trim());
                 const value_float = parseFloat(parseFloat(value).toFixed(4));
                 if (!key || isNaN(value_float)) continue;
-  
+
                 const current = Date.now();
                 setValues(prevValues => ({
                   ...prevValues,
@@ -168,12 +168,12 @@ function App() {
                       hz: 1,
                     },
                 }));
-              }else if(line.slice(0,1) === "#"){
+              } else if (line.slice(0, 1) === "#") {
                 setMessage(prev => [...prev, line.slice(1, line.length - 1)]);
               }
             }
             receivedText = lines[lines.length - 1];
-            
+
           }
         } catch (error) {
           console.error(`Error reading data: ${error}`);
@@ -186,13 +186,13 @@ function App() {
   }, [port]);
 
   return (
-    <div className='w-dvw overflow-auto h-dvh'>
-      <div className='flex flex-col md:flex-row h-auto md:h-ful'>
-        <div className='w-full md:w-1/2 h-full'>
+    <div className='w-dvw overflow-hidden h-dvh'>
+      <div className='flex flex-col md:flex-row h-auto md:h-full'>
+        <div className='w-full md:w-1/2 h-full overflow-auto'>
           <Plotter data={values} disp={disp} disp_num={tabNum} />
         </div>
-        <div className='w-full md:w-1/2 h-full'>
-          <div className='h-1/3 m-2'>
+        <div className='w-full md:w-1/2 h-full overflow-auto'>
+          <div className='h-56 m-2'>
             <ConnectionButton setPort={setPort} port={port} />
           </div>
           <div className="join grid grid-cols-3 m-4">
@@ -200,19 +200,20 @@ function App() {
             <button className="join-item btn btn-outline" onClick={() => { setActiveTab(1) }}>Message</button>
             <button className="join-item btn btn-outline" onClick={() => { setActiveTab(2) }}>Setting</button>
           </div>
-          {activeTab === 0 && (
-            <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} setColor={setColor} />
-          )}
-          {activeTab === 1 && (
-            <MessageDisp message={message} setMessage={setMessage}/>
-          )}
-          {activeTab === 2 && (
-            <Setting groups={tabNum} setGroups={setTabNum} disp={disp} setDisp={setDisp} />
-          )}
+          <div className="m-2">
+            {activeTab === 0 && (
+              <Table data={values} group={tabNum} setActive={setActive} setGroup={setGroup} setColor={setColor} />
+            )}
+            {activeTab === 1 && (
+              <MessageDisp message={message} setMessage={setMessage} />
+            )}
+            {activeTab === 2 && (
+              <Setting groups={tabNum} setGroups={setTabNum} disp={disp} setDisp={setDisp} />
+            )}
+          </div>
         </div>
       </div>
     </div >
-
   )
 }
 
