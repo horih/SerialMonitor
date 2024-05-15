@@ -25,11 +25,6 @@ interface PlotterProps {
   data: { [key: string]: Data }
 };
 
-interface TabProps {
-  data: Data[];
-  number: number
-}
-
 interface StackProps {
   data: Data[];
 }

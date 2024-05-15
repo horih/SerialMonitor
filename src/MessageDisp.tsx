@@ -28,10 +28,10 @@ export default function MessageDisp(props: MessageProps) {
         }
         term.current.open(ref.current)
         fitAddon.fit();
-        window.addEventListener('resize', () => {
-            fitAddon.fit();
-        });
+        const addon = () => fitAddon.fit();
+        window.addEventListener('resize', addon);
         return (() => {
+            window.removeEventListener('resize', addon);
         })
     }, [])
     return (
