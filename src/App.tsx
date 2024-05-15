@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import './App.css'
 import ConnectionButton from './ConnectButton'
 import RealTimeChart from './RealtimeChart'
@@ -30,31 +30,29 @@ interface TabProps {
   number: number
 }
 
-function Tab(props: TabProps) {
-  if (props.number === 0) {
-    return (
-      <>
-        <input type="radio" role="tab" className="tab" checked aria-label={"Tab" + props.number.toString()} />
-        <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box"><RealTimeChart key={props.number} data={props.data} /></div>
-      </>
-    );
-  } else {
-    return (
-      <>
-        <input type="radio" role="tab" className="tab" aria-label={"Tab" + props.number.toString()} />
-        <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box "><RealTimeChart key={props.number} data={props.data} /></div>
-      </>
-    );
-  }
-}
-
 interface StackProps {
   data: Data[];
 }
 function Stack(props: StackProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setWidth(containerRef.current.offsetWidth);
+      }
+    };
+
+    updateWidth();
+
+    window.addEventListener('resize', updateWidth);
+    return () => {
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, []);
   return (
-    <div className='grid w-full h-auto'>
-      <RealTimeChart data={props.data} />
+    <div ref={containerRef} className='grid w-full h-fit'>
+      <RealTimeChart data={props.data} width={width}/>
     </div>
   );
 }
@@ -78,9 +76,6 @@ function Plotter(props: PlotterProps) {
     setData(newData);
   }, [props.data]);
 
-
-
-  if (props.disp === 0) {
     return (
       <div className=''>
         {Array.from({ length: props.disp_num }).map((_, index) => (
@@ -88,16 +83,6 @@ function Plotter(props: PlotterProps) {
         ))}
       </div>
     );
-  } else {
-    return (
-      <div role="tablist" className="tabs tabs-bordered">
-        {Array.from({ length: props.disp_num }).map((_, index) => (
-          <Tab key={index} data={data[index]} number={index} />
-        ))}
-      </div>
-    );
-  }
-
 }
 
 function App() {

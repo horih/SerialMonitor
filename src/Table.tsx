@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import { Data } from "./App";
 
 interface TableProps {
@@ -34,7 +33,7 @@ function Cell(props: CellProps) {
                     </select>
                 </td>
                 <td className="w-12">
-                    <input type="color" value={props.data.color} onChange={(e) => {console.log(e.target.value);props.setColor(props.name,e.target.value)}} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700" id="hs-color-input"  title="Choose your color"></input>
+                    <input type="color" value={props.data.color} onChange={(e) => {props.setColor(props.name,e.target.value)}} className="p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700" id="hs-color-input"  title="Choose your color"/>
                 </td>
                 <td className="w-24">{props.name}</td>
                 <td className="w-32">{props.data.now}</td>

@@ -4,27 +4,13 @@ import { Data } from './App';
 
 interface RealTimeChartProps {
     data: Data[],
+    width : number,
 }
 
 interface Arr {
     time: UTCTimestamp,
     value: number,
 }
-
-const useWindowSize = (): number[] => {
-    const [size, setSize] = useState([0, 0]);
-    useLayoutEffect(() => {
-        const updateSize = (): void => {
-            setSize([window.innerWidth, window.innerHeight]);
-        };
-
-        window.addEventListener('resize', updateSize);
-        updateSize();
-
-        return () => window.removeEventListener('resize', updateSize);
-    }, []);
-    return size;
-};
 
 export const useAnimationFrame = (callback = () => { }) => {
     const reqIdRef = useRef<number>();
@@ -39,14 +25,14 @@ export const useAnimationFrame = (callback = () => { }) => {
     }, [loop]);
 }
 
-export function animate(series :ISeriesApi<"Line", Time, LineData<Time> | WhitespaceData<Time>, LineSeriesOptions, DeepPartial<LineStyleOptions & SeriesOptionsCommon>>[], arr : Arr[][] ){
+export function animate(series: ISeriesApi<"Line", Time, LineData<Time> | WhitespaceData<Time>, LineSeriesOptions, DeepPartial<LineStyleOptions & SeriesOptionsCommon>>[], arr: Arr[][]) {
     series.forEach((s, index) => {
-        if(arr[index].length > 1000) {
-            s.setData(arr[index].slice(arr[index].length-1000, arr[index].length - 1))
-        }else{
+        if (arr[index].length > 1000) {
+            s.setData(arr[index].slice(arr[index].length - 1000, arr[index].length - 1))
+        } else {
             s.setData(arr[index]);
         }
-        
+
     });
 };
 
@@ -55,9 +41,8 @@ export default function RealTimeChart(props: RealTimeChartProps) {
     const chartContainerRef = useRef<HTMLDivElement | null>(null);
     const [series, setSeries] = useState<ISeriesApi<"Line", Time, LineData<Time> | WhitespaceData<Time>, LineSeriesOptions, DeepPartial<LineStyleOptions & SeriesOptionsCommon>>[]>([]);
     const [arr, setArr] = useState<Arr[][]>([]);
-    const [width, height] = useWindowSize();
 
-    useAnimationFrame(() => {animate(series,arr)});
+    useAnimationFrame(() => { animate(series, arr) });
 
     useEffect(() => {
         if (props.data.length > 0) {
@@ -75,11 +60,11 @@ export default function RealTimeChart(props: RealTimeChartProps) {
     }, [props.data]);
 
     useEffect(() => {
-        const handleResize = () => {
-            chart.applyOptions({ width: width / 2});
-        };
+        // const handleResize = () => {
+        //     chart.applyOptions({ width: props.width });
+        // };
         const chart = createChart(chartContainerRef.current!, {
-            width: width / 2,
+            width: props.width,
             height: 320,
             layout: {
                 background: {
@@ -93,19 +78,19 @@ export default function RealTimeChart(props: RealTimeChartProps) {
                 secondsVisible: true,
             }
         });
+        // window.addEventListener('resize', handleResize);
         chart.timeScale().fitContent();
         setArr([]);
-        const newSeries = props.data.map((d) => chart.addLineSeries({ lineType: 0, color: d.color}));
+        const newSeries = props.data.map((d) => chart.addLineSeries({ lineType: 0, color: d.color }));
         setSeries(newSeries);
         return () => {
             chart.remove();
         };
-    }, [props.data.length, window]);
+    }, [props.data.length, props.width]);
 
     return (
         <>
             <div ref={chartContainerRef} />
-
         </>
     );
 }

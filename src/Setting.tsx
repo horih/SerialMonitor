@@ -22,14 +22,6 @@ export default function Setting(props: SettingProps) {
                             <option value={3}>3</option>
                         </select>
                     </div>
-                    <div className="grid grid-cols-2">
-                        <h1 className="card-title">Display Type</h1>
-                        <select value={props.disp} onChange={(e) => { props.setDisp(Number(e.target.value)) }} className="select bg-neutral w-full max-w-xs">
-                            <option disabled selected>Display Type</option>
-                            <option value={0}>Stack</option>
-                            <option value={1}>Tab</option>
-                        </select>
-                    </div>
                 </div>
             </div>
         </>
