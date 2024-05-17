@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import ConnectionButton from './ConnectButton'
 import RealTimeChart from './RealtimeChart'
@@ -54,7 +54,7 @@ function Stack(props: StackProps) {
 
 function Plotter(props: PlotterProps) {
 
-  const [names, setNames] = useState<string[][]>(Array(3).fill([]));
+  const [_, setNames] = useState<string[][]>(Array(3).fill([]));
   const [data, setData] = useState<Data[][]>(Array(3).fill([]));
 
   useEffect(() => {

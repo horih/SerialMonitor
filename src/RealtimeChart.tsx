@@ -1,5 +1,5 @@
 import { DeepPartial, ISeriesApi, LineData, LineSeriesOptions, LineStyleOptions, SeriesOptionsCommon, Time, UTCTimestamp, WhitespaceData, createChart } from 'lightweight-charts';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Data } from './App';
 
 interface RealTimeChartProps {
